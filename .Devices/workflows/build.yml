@@ -19,10 +19,10 @@ jobs:
           sudo apt install -y git build-essential flex bison libssl-dev libelf-dev bc libncurses-dev
           sudo apt install -y gcc-aarch64-linux-gnu
 
-      - name: Thêm KernelSU v0.9.5
+      - name: Thêm KernelSU v0.9.5 — ĐÚNG
         working-directory: kernel
         run: |
-          curl -LSs https://raw.githubusercontent.com/tiann/KernelSU/v0.9.5/kernel"setup.sh | bash
+          curl -LSs https://raw.githubusercontent.com/tiann/KernelSU/v0.9.5/kernel/setup.sh | bash
 
       - name: Cấu hình & biên dịch
         working-directory: kernel
