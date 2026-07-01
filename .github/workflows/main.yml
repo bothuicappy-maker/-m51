@@ -1,0 +1,49 @@
+name: Build Kernel M51 + KernelSU v0.9.5
+on:
+  workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Lấy mã nguồn nhân
+        uses: actions/checkout@v4
+        with:
+          repository: dheerajgattupalli/sm6150_m51
+          ref: master
+          path: kernel
+
+      - name: Cài công cụ
+        run: |
+          sudo apt update -y
+          sudo apt install -y git build-essential flex bison libssl-dev libelf-dev bc libncurses-dev
+          sudo apt install -y gcc-aarch64-linux-gnu
+
+      - name: Thêm KernelSU v0.9.5
+        working-directory: kernel
+        run: |
+          curl -LSs https://raw.githubusercontent.com/tiann/KernelSU/v0.9.5/kernel"setup.sh | bash
+
+      - name: Cấu hình & biên dịch
+        working-directory: kernel
+        run: |
+          export ARCH=arm64
+          export CROSS_COMPILE=aarch64-linux-gnu-
+          make mrproper
+          make m51_defconfig
+          echo -e "CONFIG_KSU=y\nCONFIG_KPROBES=y\nCONFIG_HAVE_KPROBES=y\nCONFIG_KPROBE_EVENTS=y\nCONFIG_MODULES=y" >> .config
+          make -j$(nproc) Image.gz-dtb
+
+      - name: Đóng gói
+        working-directory: kernel
+        run: |
+          cp arch/arm64/boot/Image.gz-dtb AnyKernel3/
+          cd AnyKernel3
+          zip -r KernelSU-M51-crDroid.zip *
+
+      - name: Tải kết quả
+        uses: actions/upload-artifact@v4
+        with:
+          path: kernel/AnyKernel3/KernelSU-M51-crDroid.zip
+          name: Kernel-M51-v0.9.5
+          
